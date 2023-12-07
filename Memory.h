@@ -4,26 +4,31 @@
 #include "MemoryRiver.h"
 #include <iostream>
 #include <set>
+#include <vector>
 
 template<class INDEX, class VALUE>
 class Memory {
 
 private:
     const int SIZE_OF_BLOCK = 10;
-    int num_of_block = 0;
+    int num_of_block;
 
     struct BlockNode {
 
         INDEX index;
         int address;
         int size;
+        int pre;
         int next;
 
-        BlockNode() : address(-1), size(0), next(-1) {}
+        BlockNode() : address(-1), size(0), pre(-1), next(-1) {}
 
-        BlockNode(INDEX index, int address, int size, int next) : index(index), address(address), size(size), next(next) {}
+        BlockNode(INDEX index, int address, int size, int pre, int next) : index(index), address(address), size(size), pre(pre), next(next) {}
 
     }; // maintain the block link directly in the file
+
+    BlockNode head, tail;
+    int head_pos = sizeof(int), tail_pos = sizeof(int) + sizeof(BlockNode);
 
     int FindIndex(const INDEX &index) {
         BlockNode p;

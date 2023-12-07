@@ -25,14 +25,6 @@ public:
         return tmp_file.good();
     }
 
-    int get_tail() {
-        file.open(file_name, std::ios::in);
-        file.seekg(0, std::ios::end);
-        int index = file.tellg();
-        file.close();
-        return index;
-    }
-
     void initialise(string FN = "") {
         if (FN != "") file_name = FN;
         file.open(file_name, std::ios::out);
@@ -96,7 +88,6 @@ public:
     //删除位置索引index对应的对象(不涉及空间回收时，可忽略此函数)，保证调用的index都是由write函数产生
     void Delete(int index) {
         /* your code here */
-
     }
 };
 
