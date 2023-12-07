@@ -9,7 +9,7 @@ Memory<INDEX, VALUE>::Memory(const string &index_file_name, const string &value_
         head_node.next = tail_pos;
         tail_node.pre = head_pos;
         memory_index.write(head_node);
-         memory_index.write(tail_node);
+        memory_index.write(tail_node);
     }
     if (!memory_value.file_exist()) {
         memory_value.initialise();

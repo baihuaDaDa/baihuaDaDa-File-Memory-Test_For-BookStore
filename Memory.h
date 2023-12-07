@@ -56,8 +56,6 @@ public:
 
     void Find(const INDEX &);
 
-
-
 };
 
 #endif //INC_2074_MEMORY_H
