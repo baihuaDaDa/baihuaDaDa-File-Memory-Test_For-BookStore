@@ -20,7 +20,7 @@ Memory<INDEX, VALUE>::Memory(const string &index_file_name, const string &value_
 }
 
 template<class INDEX, class VALUE>
-void Memory<INDEX, VALUE>::Insert(const INDEX &index, const VALUE &value) {
+void Memory<INDEX, VALUE>::Insert(const INDEX &index, VALUE &value) {
     int pos = FindIndex(index);
     if (pos == -1) {
         BlockNode new_block(index, SIZE_OF_BLOCK * (num_of_block++), 1, tail.pre, tail_pos);
@@ -130,3 +130,5 @@ void Memory<INDEX, VALUE>::Find(const INDEX &index) {
         std::cout << *iter << (iter != --data.end() ? ' ' : '\n');
     }
 }
+
+template class Memory<string, int>;

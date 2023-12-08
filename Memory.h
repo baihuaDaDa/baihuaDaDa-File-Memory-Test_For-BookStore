@@ -50,7 +50,7 @@ public:
 
     Memory(const string &, const string &); // constructor
 
-    void Insert(const INDEX &, const VALUE &);
+    void Insert(const INDEX &, VALUE &);
 
     void Delete(const INDEX &, const VALUE &);
 
