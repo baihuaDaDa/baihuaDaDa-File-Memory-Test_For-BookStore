@@ -1,7 +1,6 @@
 #include "Memory.h"
 
-template<class INDEX, class VALUE>
-Memory<INDEX, VALUE>::Memory(const string &index_file_name, const string &value_file_name)
+Memory::Memory(const string &index_file_name, const string &value_file_name)
         : memory_index(index_file_name), memory_value(value_file_name) {
     if (!memory_index.file_exist()) {
         memory_index.initialise();
@@ -19,11 +18,10 @@ Memory<INDEX, VALUE>::Memory(const string &index_file_name, const string &value_
     memory_index.get_info(num_of_block, 1);
 }
 
-template<class INDEX, class VALUE>
-void Memory<INDEX, VALUE>::Insert(const INDEX &index, VALUE &value) {
+void Memory::Insert(const char index[LENGTH_OF_STRING], int &value) {
     int pos = FindIndex(index);
     if (pos == -1) {
-        BlockNode new_block(index, SIZE_OF_BLOCK * (num_of_block++), 1, tail.pre, tail_pos);
+        BlockNode new_block(index, sizeof(int) * SIZE_OF_BLOCK * (num_of_block++), 1, tail.pre, tail_pos);
         memory_index.write_info(num_of_block, 1);
         BlockNode end;
         memory_index.read(end, tail.pre);
@@ -35,15 +33,16 @@ void Memory<INDEX, VALUE>::Insert(const INDEX &index, VALUE &value) {
     } else {
         BlockNode now;
         memory_index.read(now, pos);
-        while (now.index == index) {
+        while (cmp_string(now.index, index)) {
             pos = now.next;
             memory_index.read(now, pos);
         }
         pos = now.pre;
         memory_index.read(now, pos);
         if (now.size + 1 <= SIZE_OF_BLOCK) {
-            memory_value.update(value, now.address + now.size * sizeof(VALUE));
+            memory_value.update(value, now.address + now.size * sizeof(int));
             now.size++;
+            memory_index.update(now, pos);
         } else {
             BlockNode next;
             memory_index.read(next, now.next);
@@ -58,26 +57,24 @@ void Memory<INDEX, VALUE>::Insert(const INDEX &index, VALUE &value) {
     }
 }
 
-template<class INDEX, class VALUE>
-void Memory<INDEX, VALUE>::Delete(const INDEX &index, const VALUE &value) {
+void Memory::Delete(const char index[LENGTH_OF_STRING], const int &value) {
     int pos = FindIndex(index);
     if (pos == -1) {
-        std::cout << "null\n";
         return;
     }
-    std::vector<VALUE> data;
-    VALUE tmp;
-    int size, address;
+    std::vector<int> data;
+    int tmp;
+    int address;
     BlockNode now;
     memory_index.read(now, pos);
-    while (now.index == index) {
+    while (cmp_string(now.index, index)) {
         address = now.address;
         for (int i = 0; i < now.size; i++) {
             memory_value.read(tmp, address);
             if (tmp != value) {
                 data.push_back(tmp);
             }
-            address += sizeof(VALUE);
+            address += sizeof(int);
         }
         if (data.empty()) {
             BlockNode pre, next;
@@ -87,15 +84,18 @@ void Memory<INDEX, VALUE>::Delete(const INDEX &index, const VALUE &value) {
             next.pre = now.pre;
             num_of_block--;
             memory_index.write_info(num_of_block, 1);
+            memory_index.update(pre, now.pre);
+            memory_index.update(next, now.next);
         } else {
             now.size = 0;
             address = now.address;
             for (int i = 0; i < data.size(); i++) {
                 memory_value.update(data[i], address);
-                address += sizeof(VALUE);
+                address += sizeof(int);
                 now.size++;
             }
             data.clear();
+            memory_index.update(now, pos);
         }
         pos = now.next;
         memory_index.read(now, pos);
@@ -103,25 +103,24 @@ void Memory<INDEX, VALUE>::Delete(const INDEX &index, const VALUE &value) {
 
 }
 
-template<class INDEX, class VALUE>
-void Memory<INDEX, VALUE>::Find(const INDEX &index) {
+void Memory::Find(const char index[LENGTH_OF_STRING]) {
     int pos = FindIndex(index);
     if (pos == -1) {
         std::cout << "null\n";
         return;
     }
-    std::set<VALUE> data;
-    VALUE tmp;
+    std::set<int> data;
+    int tmp;
     int size, address;
     BlockNode now;
     memory_index.read(now, pos);
-    while (now.index == index) {
+    while (cmp_string(now.index, index)) {
         size = now.size;
         address = now.address;
         for (int i = 0; i < size; i++) {
             memory_value.read(tmp, address);
             data.insert(tmp);
-            address += sizeof(VALUE);
+            address += sizeof(int);
         }
         pos = now.next;
         memory_index.read(now, pos);
@@ -130,5 +129,3 @@ void Memory<INDEX, VALUE>::Find(const INDEX &index) {
         std::cout << *iter << (iter != --data.end() ? ' ' : '\n');
     }
 }
-
-template class Memory<string, int>;

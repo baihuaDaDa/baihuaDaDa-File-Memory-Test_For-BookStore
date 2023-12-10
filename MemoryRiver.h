@@ -8,13 +8,12 @@ using std::fstream;
 using std::ifstream;
 using std::ofstream;
 
-template<class T, int info_len = 2>
+template<class T, int info_len = 2, int sizeofT = 80>
 class MemoryRiver {
 private:
     /* your code here */
     fstream file;
     string file_name;
-    int sizeofT = sizeof(T);
 public:
     MemoryRiver() = default;
 
