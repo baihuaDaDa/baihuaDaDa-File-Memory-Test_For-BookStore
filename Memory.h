@@ -9,25 +9,34 @@
 class Memory {
 
 private:
-    static constexpr int LENGTH_OF_STRING = 65;
-    const int SIZE_OF_BLOCK = 500;
+    static constexpr int LENGTH_OF_STRING = 66;
+    static constexpr int SIZE_OF_BLOCK = 500;
     int num_of_block;
+
+    struct Pair {
+        char index[LENGTH_OF_STRING];
+        int value;
+
+        Pair() : index(""), value(0) {}
+
+        Pair(const char index[LENGTH_OF_STRING], const int &value) : value(value) {
+            for (int i = 0; i < LENGTH_OF_STRING; i++) {
+                this->index[i] = index[i];
+            }
+        }
+    };
 
     struct BlockNode {
 
-        char index[LENGTH_OF_STRING]{};
+        Pair element;
         int address;
         int size;
         int pre;
         int next;
 
-        BlockNode() : index(""), address(-1), size(0), pre(-1), next(-1) {}
+        BlockNode() : element(), address(-1), size(0), pre(-1), next(-1) {}
 
-        BlockNode(const char index[LENGTH_OF_STRING], int address, int size, int pre, int next) : address(address), size(size), pre(pre), next(next) {
-            for (int i = 0; i < LENGTH_OF_STRING; i++) {
-                this->index[i] = index[i];
-            }
-        }
+        BlockNode(Pair element, int address, int size, int pre, int next) : element(element), address(address), size(size), pre(pre), next(next) {}
 
         ~BlockNode() = default;
 
@@ -36,32 +45,66 @@ private:
     BlockNode head, tail;
     int head_pos = sizeof(int), tail_pos = sizeof(int) + sizeof(BlockNode);
 
-    static bool cmp_string(const char a[LENGTH_OF_STRING], const char b[LENGTH_OF_STRING]) {
+    static int cmp_string(const char a[LENGTH_OF_STRING], const char b[LENGTH_OF_STRING]) {
         for (int i = 0; i < LENGTH_OF_STRING; i++) {
-            if (a[i] != b[i]) {
-                return false;
+            if (a[i] < b[i]) {
+                return -1;
+            } else if (a[i] > b[i]) {
+                return 1;
             }
         }
-        return true;
+        return 0;
     }
 
-    int FindIndex(const char index[LENGTH_OF_STRING]) {
+    static int cmp_pair(const Pair &a, const Pair &b) {
+        int flag = cmp_string(a.index, b.index);
+        if (flag) {
+            return flag;
+        }
+        if (a.value < b.value) {
+            return -1;
+        }
+        if (a.value > b.value) {
+            return 1;
+        }
+        return 0;
+    }
+
+    int FindElement(const Pair &element) {
         BlockNode p;
-        int pos = sizeof(int);
-        while (pos != -1) {
-            memory_index.read(p, pos);
+        int pos = head_pos;
+        memory_BlockNode.read(p, pos);
+        while (pos != tail_pos) {
 //            std::cout << p.size << p.pre << std::endl;
 //            if (p.index == "") std::cout << 1 <<  std::endl;
-            if (cmp_string(p.index, index)) {
-                return pos;
+            if (cmp_pair(p.element, element) == 1) {
+                break;
             }
             pos = p.next;
+            memory_BlockNode.read(p, pos);
         }
-        return -1;
+        return p.pre;
     } // find the first address of a specific index
 
-    MemoryRiver<BlockNode, 1> memory_index;
-    MemoryRiver<int, 0> memory_value;
+    int BinarySearchPair(const Pair &element, const Pair *data, const BlockNode &block) {
+        int l = 0, r = block.size - 1, mid;
+        while (l <= r) {
+            mid = l + (r - l) / 2;
+            int flag = cmp_pair(data[mid], element);
+            if (flag == -1) {
+                l = mid + 1;
+            } else if (flag == 1) {
+                r = mid - 1;
+            } else {
+                return mid;
+            }
+        }
+        return l;
+    }
+
+    MemoryRiver<BlockNode, 1> memory_BlockNode;
+    MemoryRiver<Pair[SIZE_OF_BLOCK], 0> memory_element;
+    string element_file_name;
 
 public:
 

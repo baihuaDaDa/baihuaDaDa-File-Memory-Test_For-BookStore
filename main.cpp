@@ -1,12 +1,12 @@
 #include "Memory.h"
 
 int main() {
-    Memory memory("index.bin", "value.bin");
+    Memory memory("BlockNode.bin", "element.bin");
     int n, value;
     string instruction;
     std::cin >> n;
     for (int i = 1; i <= n; i++) {
-        char index[65] = {};
+        char index[66] = {};
         std::cin >> instruction;
         if (instruction == "insert") {
             std::cin >> index >> value;
