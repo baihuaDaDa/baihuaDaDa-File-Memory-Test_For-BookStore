@@ -6,7 +6,7 @@ int main() {
     string instruction;
     std::cin >> n;
     for (int i = 1; i <= n; i++) {
-        char index[64] = {};
+        char index[65] = {};
         std::cin >> instruction;
         if (instruction == "insert") {
             std::cin >> index >> value;

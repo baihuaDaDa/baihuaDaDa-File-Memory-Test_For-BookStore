@@ -9,8 +9,8 @@
 class Memory {
 
 private:
-    static constexpr int LENGTH_OF_STRING = 64;
-    const int SIZE_OF_BLOCK = 10;
+    static constexpr int LENGTH_OF_STRING = 65;
+    const int SIZE_OF_BLOCK = 2;
     int num_of_block;
 
     struct BlockNode {
@@ -24,7 +24,7 @@ private:
         BlockNode() : index(""), address(-1), size(0), pre(-1), next(-1) {}
 
         BlockNode(const char index[LENGTH_OF_STRING], int address, int size, int pre, int next) : address(address), size(size), pre(pre), next(next) {
-            for (int i = 0; i < 64; i++) {
+            for (int i = 0; i < LENGTH_OF_STRING; i++) {
                 this->index[i] = index[i];
             }
         }
@@ -61,7 +61,7 @@ private:
     } // find the first address of a specific index
 
     MemoryRiver<BlockNode, 1> memory_index;
-    MemoryRiver<int, 0, sizeof(int)> memory_value;
+    MemoryRiver<int, 0> memory_value;
 
 public:
 

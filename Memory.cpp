@@ -46,13 +46,13 @@ void Memory::Insert(const char index[LENGTH_OF_STRING], int &value) {
         } else {
             BlockNode next;
             memory_index.read(next, now.next);
-            BlockNode new_block(index, SIZE_OF_BLOCK * (num_of_block++), 1, pos, now.next);
+            BlockNode new_block(index, sizeof(int) * SIZE_OF_BLOCK * (num_of_block++), 1, pos, now.next);
             memory_index.write_info(num_of_block, 1);
             now.next = memory_index.write(new_block);
             next.pre = now.next;
             memory_index.update(now, pos);
             memory_index.update(next, new_block.next);
-            memory_value.update(value, now.address);
+            memory_value.update(value, new_block.address);
         }
     }
 }
