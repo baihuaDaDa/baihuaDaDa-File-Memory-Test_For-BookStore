@@ -10,7 +10,7 @@ class Memory {
 
 private:
     static constexpr int LENGTH_OF_STRING = 65;
-    const int SIZE_OF_BLOCK = 2;
+    const int SIZE_OF_BLOCK = 500;
     int num_of_block;
 
     struct BlockNode {
