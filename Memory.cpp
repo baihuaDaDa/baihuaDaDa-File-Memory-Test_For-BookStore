@@ -25,6 +25,20 @@ void Memory::Insert(const char index[LENGTH_OF_STRING], int &value) {
     Pair data[SIZE_OF_BLOCK] = {};
     if (pos == head_pos) {
         pos = head.next;
+        if (pos == tail_pos) {
+            BlockNode new_block(element, sizeof(Pair[SIZE_OF_BLOCK]) * (num_of_block++), 1, head_pos, tail_pos);
+            memory_BlockNode.write_info(num_of_block, 1);
+            head.next = memory_BlockNode.write(new_block);
+            tail.pre = head.next;
+            memory_BlockNode.update(head, head_pos);
+            memory_BlockNode.update(tail, tail_pos);
+            fstream file;
+            file.open(element_file_name, std::ios::out | std::ios::in);
+            file.seekp(new_block.address);
+            file.write(reinterpret_cast<char *>(&element), sizeof(Pair));
+            file.close();
+            return;
+        }
         memory_BlockNode.read(now, pos);
         if (now.size + 1 <= SIZE_OF_BLOCK) {
             fstream file;
@@ -165,6 +179,10 @@ void Memory::Find(const char index[LENGTH_OF_STRING]) {
     BlockNode now;
     if (pos == head_pos) {
         pos = head.next;
+        if (pos == tail_pos) {
+            std::cout << "null\n";
+            return;
+        }
     }
     Pair data[SIZE_OF_BLOCK] = {};
     int i = 0;
@@ -174,7 +192,7 @@ void Memory::Find(const char index[LENGTH_OF_STRING]) {
         memory_BlockNode.read(now, pos);
         memory_element.read(data, now.address);
         for (i = 0; i < now.size; i++) {
-            if (data[i].index == index) {
+            if (cmp_string(data[i].index, index) == 0) {
                 flag = true;
                 total_flag = true;
                 std::cout << data[i].value << ' ';

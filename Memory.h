@@ -71,20 +71,20 @@ private:
     }
 
     int FindElement(const Pair &element) {
-        BlockNode p;
+        BlockNode node;
         int pos = head_pos;
-        memory_BlockNode.read(p, pos);
+        memory_BlockNode.read(node, pos);
         while (pos != tail_pos) {
-//            std::cout << p.size << p.pre << std::endl;
-//            if (p.index == "") std::cout << 1 <<  std::endl;
-            if (cmp_pair(p.element, element) == 1) {
+//            std::cout << node.size << node.pre << std::endl;
+//            if (node.index == "") std::cout << 1 <<  std::endl;
+            if (cmp_pair(node.element, element) == 1) {
                 break;
             }
-            pos = p.next;
-            memory_BlockNode.read(p, pos);
+            pos = node.next;
+            memory_BlockNode.read(node, pos);
         }
-        return p.pre;
-    } // find the first address of a specific index
+        return node.pre;
+    }
 
     int BinarySearchPair(const Pair &element, const Pair *data, const BlockNode &block) {
         int l = 0, r = block.size - 1, mid;
