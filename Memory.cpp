@@ -24,6 +24,7 @@ void Memory::Insert(const char index[LENGTH_OF_STRING], int &value) {
     BlockNode now;
     Pair data[SIZE_OF_BLOCK] = {};
     if (pos == head_pos) {
+        memory_BlockNode.read(head, head_pos);
         pos = head.next;
         if (pos == tail_pos) {
             BlockNode new_block(element, sizeof(Pair[SIZE_OF_BLOCK]) * (num_of_block++), 1, head_pos, tail_pos);
@@ -75,6 +76,7 @@ void Memory::Insert(const char index[LENGTH_OF_STRING], int &value) {
             memory_element.update(data, now.address);
             memory_element.update(new_data, new_block.address);
         }
+        return;
     }
     memory_BlockNode.read(now, pos);
     memory_element.read(data, now.address);
@@ -178,6 +180,7 @@ void Memory::Find(const char index[LENGTH_OF_STRING]) {
     int pos = FindElement(element);
     BlockNode now;
     if (pos == head_pos) {
+        memory_BlockNode.read(head, head_pos);
         pos = head.next;
         if (pos == tail_pos) {
             std::cout << "null\n";
@@ -186,7 +189,7 @@ void Memory::Find(const char index[LENGTH_OF_STRING]) {
     }
     Pair data[SIZE_OF_BLOCK] = {};
     int i = 0;
-    bool flag = false, total_flag = false;
+    bool flag, total_flag = false;
     while (pos != tail_pos) {
         flag = false;
         memory_BlockNode.read(now, pos);
@@ -200,7 +203,7 @@ void Memory::Find(const char index[LENGTH_OF_STRING]) {
                 break;
             }
         }
-        if (i != SIZE_OF_BLOCK) {
+        if (i != now.size) {
             break;
         }
         pos = now.next;
