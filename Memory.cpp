@@ -75,51 +75,54 @@ void Memory::Insert(const char index[LENGTH_OF_STRING], int &value) {
             memory_BlockNode.write_info(num_of_block, 1);
             memory_element.update(data, now.address);
             memory_element.update(new_data, new_block.address);
-        }
+        } // 裂块
         return;
-    }
+    } // 首个块的第一个位置插入
     memory_BlockNode.read(now, pos);
     memory_element.read(data, now.address);
     int element_pos = BinarySearchPair(element, data, now);
-    if (element_pos < SIZE_OF_BLOCK) {
+    if (element_pos < now.size) {
         if (cmp_pair(data[element_pos], element) == 0) {
             return;
         }
     }
     if (now.size + 1 <= SIZE_OF_BLOCK) {
-        fstream file;
-        file.open(element_file_name, std::ios::in);
-        file.seekg(now.address);
-        file.read(reinterpret_cast<char *>(data), sizeof(Pair) * element_pos);
-        file.seekg(now.address + sizeof(Pair) * (element_pos + 1));
-        file.read(reinterpret_cast<char *>(data + element_pos + 1), sizeof(Pair) * (now.size - element_pos - 1));
-        file.close();
+        for (int i = now.size - 2; i >= element_pos; i--) {
+            data[i + 1] = data[i];
+        }
         data[element_pos] = element;
         now.size++;
         memory_BlockNode.update(now, pos);
         memory_element.update(data, now.address);
     } else {
-        BlockNode new_block(element, sizeof(Pair[SIZE_OF_BLOCK]) * (num_of_block++), SIZE_OF_BLOCK / 2, now.pre, pos);
-        now.size /= 2;
+        const int half_size = SIZE_OF_BLOCK / 2;
+        BlockNode new_block(now.element, sizeof(Pair[SIZE_OF_BLOCK]) * (num_of_block++), half_size, now.pre, pos);
+        now.size = half_size;
         Pair new_data[SIZE_OF_BLOCK] = {};
-        fstream file;
-        file.open(element_file_name, std::ios::in);
-        file.seekg(now.address);
-        file.read(reinterpret_cast<char *>(new_data), sizeof(Pair) * new_block.size);
-        file.seekg(now.address + new_block.size * sizeof(Pair));
-        file.read(reinterpret_cast<char *>(data), sizeof(Pair) * now.size);
-        file.close();
-        if (element_pos < SIZE_OF_BLOCK / 2) {
-            for (int i = new_block.size - 1; i >= element_pos; i--) {
-                new_data[i + 1] = new_data[i];
+        if (element_pos < half_size) {
+            for (int i = 0; i < element_pos; i++) {
+                new_data[i] = data[i];
+            }
+            for (int i = half_size; i > element_pos; i--) {
+                new_data[i] = data[i - 1];
             }
             new_data[element_pos] = element;
-            new_block.size++;
-        } else {
-            for (int i = now.size - 1; i >= element_pos - SIZE_OF_BLOCK / 2; i--) {
-                data[i + 1] = data[i];
+            for (int i = 0; i < half_size; i++) {
+                data[i] = data[half_size + i];
             }
-            data[element_pos] = element;
+            new_block.size++;
+            now.element = data[0];
+        } else {
+            for (int i = 0; i < half_size; i++) {
+                new_data[i] = data[i];
+            }
+            for (int i = 0; i < element_pos - half_size; i++) {
+                data[i] = data[i + half_size];
+            }
+            for (int i = half_size; i > element_pos - half_size; i--) {
+                data[i] = data[i + half_size - 1];
+            }
+            data[element_pos - half_size] = element;
             now.element = data[0];
             now.size++;
         };
@@ -132,7 +135,8 @@ void Memory::Insert(const char index[LENGTH_OF_STRING], int &value) {
         memory_BlockNode.write_info(num_of_block, 1);
         memory_element.update(data, now.address);
         memory_element.update(new_data, new_block.address);
-    }
+    } // 裂块
+    // 其余位置插入
 }
 
 void Memory::Delete(const char index[LENGTH_OF_STRING], const int &value) {
@@ -146,16 +150,12 @@ void Memory::Delete(const char index[LENGTH_OF_STRING], const int &value) {
     memory_BlockNode.read(now, pos);
     memory_element.read(data, now.address);
     int element_pos = BinarySearchPair(element, data, now);
-    if (element_pos < SIZE_OF_BLOCK) {
+    if (element_pos < now.size) {
         if (cmp_pair(data[element_pos], element) == 0) {
             if (now.size > 1) {
-                fstream file;
-                file.open(element_file_name, std::ios::in);
-                file.seekg(now.address);
-                file.read(reinterpret_cast<char *>(data), sizeof(Pair) * element_pos);
-                file.seekg(now.address + sizeof(Pair) * (element_pos + 1));
-                file.read(reinterpret_cast<char *>(data + element_pos), sizeof(Pair) * (now.size - element_pos - 1));
-                file.close();
+                for (int i = element_pos; i < now.size - 1; i++) {
+                    data[i] = data[i + 1];
+                }
                 now.size--;
                 now.element = data[0];
                 memory_BlockNode.update(now, pos);
@@ -166,11 +166,9 @@ void Memory::Delete(const char index[LENGTH_OF_STRING], const int &value) {
                 memory_BlockNode.read(next, now.next);
                 pre.next = now.next;
                 next.pre = now.pre;
-                num_of_block--;
                 memory_BlockNode.update(pre, now.pre);
-                memory_BlockNode.update(now, now.next);
-                memory_BlockNode.write_info(num_of_block, 1);
-            }
+                memory_BlockNode.update(next, now.next);
+            } // 删除空块
         }
     }
 }
@@ -188,9 +186,9 @@ void Memory::Find(const char index[LENGTH_OF_STRING]) {
         }
     }
     Pair data[SIZE_OF_BLOCK] = {};
-    int i = 0;
+    int i;
     bool flag, total_flag = false;
-    while (pos != tail_pos) {
+    while (pos != tail_pos) { // 此处冗余，多搜索了一块，后续可优化
         flag = false;
         memory_BlockNode.read(now, pos);
         memory_element.read(data, now.address);

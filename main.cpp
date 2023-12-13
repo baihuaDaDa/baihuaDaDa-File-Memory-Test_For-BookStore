@@ -1,8 +1,8 @@
 #include "Memory.h"
 
 int main() {
-//    freopen("test.in", "r", stdin);
-//    freopen("test.out", "w",stdout);
+    freopen("test.in", "r", stdin);
+    freopen("test.out", "w",stdout);
     Memory memory("BlockNode.bin", "element.bin");
     int n, value;
     string instruction;
