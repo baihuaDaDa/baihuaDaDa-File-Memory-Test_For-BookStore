@@ -87,7 +87,7 @@ void Memory::Insert(const char index[LENGTH_OF_STRING], int &value) {
         }
     }
     if (now.size + 1 <= SIZE_OF_BLOCK) {
-        for (int i = now.size - 2; i >= element_pos; i--) {
+        for (int i = now.size - 1; i >= element_pos; i--) {
             data[i + 1] = data[i];
         }
         data[element_pos] = element;

@@ -6,6 +6,7 @@ int main() {
     Memory memory("BlockNode.bin", "element.bin");
     int n, value;
     string instruction;
+    int find_count = 0;
     std::cin >> n;
     for (int i = 1; i <= n; i++) {
         char index[66] = {};
@@ -22,6 +23,7 @@ int main() {
         }
         if (instruction == "find") {
             std::cin >> index;
+            std::cout << ++find_count << '|';
             memory.Find(index);
 //            std::cout << memory.get_num_of_block() << std::endl;
         }
