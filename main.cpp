@@ -1,8 +1,8 @@
 #include "Memory.h"
 
 int main() {
-    freopen("test.in", "r", stdin);
-    freopen("test.out", "w",stdout);
+//    freopen("test.in", "r", stdin);
+//    freopen("test.out", "w",stdout);
     Memory memory("BlockNode.bin", "element.bin");
     int n, value;
     string instruction;
@@ -23,7 +23,7 @@ int main() {
         }
         if (instruction == "find") {
             std::cin >> index;
-            std::cout << ++find_count << '|';
+//            std::cout << ++find_count << '|';
             memory.Find(index);
 //            std::cout << memory.get_num_of_block() << std::endl;
         }
