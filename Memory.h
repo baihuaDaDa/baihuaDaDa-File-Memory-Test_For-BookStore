@@ -10,7 +10,7 @@ class Memory {
 
 private:
     static constexpr int LENGTH_OF_STRING = 66;
-    static constexpr int SIZE_OF_BLOCK = 100;
+    static constexpr int SIZE_OF_BLOCK = 2000;
     int num_of_block;
 
     struct Pair {
